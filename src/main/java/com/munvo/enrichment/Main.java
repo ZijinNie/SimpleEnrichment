@@ -5,12 +5,14 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.munvo.enrichment.configuration.Configuration;
 import com.munvo.enrichment.input.InputSource;
 import com.munvo.enrichment.model.Call;
 import com.munvo.enrichment.model.EnrichedCall;
 import com.munvo.enrichment.parser.FileReaderParser;
+import com.munvo.enrichment.parserFactory.FileReaderParserFactory;
 
 public class Main {
 	
@@ -23,10 +25,11 @@ public class Main {
     
     public static void main(String[] args) {
         // Get an instance of Configuration using Singleton pattern
-        Configuration configuration = null;
-
+        Configuration configuration = Configuration.INSTANCE;
+        String type = configuration.getType();
         // Instantiate an input stream converter
-        FileReaderParser fileReaderParser = null;
+        FileReaderParserFactory fileReaderParserFactory = new FileReaderParserFactory ();
+        FileReaderParser fileReaderParser = fileReaderParserFactory.createFileReader(type);
 
         // Inject the file reader parser
 		try {
@@ -35,9 +38,16 @@ public class Main {
 	        calls.stream()
             .map(c -> new EnrichedCall(c, inputSource.query(c.getSubscriberId())))
             .forEach(EnrichedCall::toString);
+	        
+	        
 		} catch (URISyntaxException | IOException e) {
 			e.printStackTrace();
 		}
+		
+		for(Call c: calls) {
+			System.out.println(c.toString());
+		}
+		System.out.print("Job finished");
 
     }
 
